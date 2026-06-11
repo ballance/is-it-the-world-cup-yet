@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Is it the World Cup?</title>
+  <meta name="description" content="The definitive answer to the question: Is it the World Cup?">
+  <meta property="og:title" content="Is it the World Cup?">
+  <meta property="og:description" content="The definitive answer.">
+  <meta property="og:url" content="https://worldcupyet.com">
+  <meta property="og:type" content="website">
+  <style>
+    /* === Reset & Base === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #0a1128;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    /* === Canvas Particle Layer === */
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* === NO State === */
+    #answer {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(80px, 20vw, 200px);
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+      transition: opacity 0.3s ease;
+      user-select: none;
+    }
+
+    #countdown {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(14px, 2.5vw, 22px);
+      color: #6b7fa3;
+      margin-top: 20px;
+      letter-spacing: 1px;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    #copyright {
+      position: absolute;
+      bottom: 20px;
+      z-index: 1;
+      font-size: 10px;
+      color: #1e3a5f;
+      text-decoration: none;
+    }
+
+    /* === YES / Celebration State === */
+    body.yes {
+      background: linear-gradient(135deg, #002868, #bf0a30, #006847, #ce1126, #ffffff, #002868);
+      background-size: 400% 400%;
+      animation: celebrate 6s ease-in-out infinite;
+    }
+
+    @keyframes celebrate {
+      0%, 100% { background-position: 0% 50%; }
+      25% { background-position: 50% 0%; }
+      50% { background-position: 100% 50%; }
+      75% { background-position: 50% 100%; }
+    }
+
+    body.yes #answer {
+      color: #FFD700;
+      text-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(255, 215, 0, 0.4),
+        0 0 80px rgba(255, 215, 0, 0.2);
+      will-change: transform, opacity, text-shadow;
+      animation: yesEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                 yesPulse 2s ease-in-out 0.8s infinite;
+    }
+
+    @keyframes yesEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(40px);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.15) translateY(0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes yesPulse {
+      0%, 100% {
+        text-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.3),
+          0 0 40px rgba(255, 215, 0, 0.4),
+          0 0 80px rgba(255, 215, 0, 0.2);
+      }
+      50% {
+        text-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.3),
+          0 0 60px rgba(255, 215, 0, 0.6),
+          0 0 120px rgba(255, 215, 0, 0.4);
+      }
+    }
+
+    /* === Trophy above YES === */
+    #trophy-icon {
+      display: none;
+      position: absolute;
+      top: -0.6em;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0.5em;
+      height: 0.5em;
+      opacity: 0;
+      filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.5));
+    }
+
+    body.yes #trophy-icon {
+      display: block;
+      animation: trophyDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+    }
+
+    body.yes #answer::before,
+    body.yes #answer::after {
+      content: none;
+    }
+
+    @keyframes trophyDrop {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px);
+      }
+      70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(4px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    /* === Subtitle Greeting === */
+    #subtitle {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(14px, 3vw, 24px);
+      font-family: Georgia, serif;
+      font-style: italic;
+      color: #8fbc8f;
+      opacity: 0;
+      margin-top: 8px;
+      transition: opacity 0.8s ease;
+    }
+
+    #subtitle.visible {
+      opacity: 1;
+    }
+
+    /* === Interaction Effects === */
+    @keyframes shake {
+      0%, 100% { transform: scale(1) translate(0, 0); }
+      10% { transform: scale(1.1) translate(-4px, 2px); }
+      30% { transform: scale(1.1) translate(4px, -2px); }
+      50% { transform: scale(1.1) translate(-2px, 4px); }
+      70% { transform: scale(1.1) translate(2px, -4px); }
+      90% { transform: scale(1.1) translate(-2px, -2px); }
+    }
+
+    body.yes #answer.shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    body.yes.inverted {
+      background: #FFD700;
+    }
+
+    body.yes.inverted #answer {
+      color: #0a1128;
+      text-shadow: none;
+      animation: none;
+    }
+
+    #chant-toast {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(16px, 3vw, 28px);
+      font-family: Georgia, serif;
+      font-style: italic;
+      color: #FFD700;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      margin-top: 10px;
+    }
+
+    #chant-toast.visible {
+      opacity: 1;
+    }
+
+    /* === Boss Mode === */
+    #boss-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    #boss-btn:hover {
+      color: rgba(255, 255, 255, 0.7);
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    body.boss-active #boss-btn {
+      z-index: 10001;
+      color: #666;
+      background: #f3f3f3;
+      border-color: #ccc;
+    }
+
+    body.boss-active #boss-btn:hover {
+      color: #333;
+      background: #e8e8e8;
+      border-color: #999;
+    }
+
+    #boss-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #fff;
+      font-family: Calibri, "Segoe UI", Arial, sans-serif;
+      font-size: 12px;
+      color: #1a1a1a;
+      overflow: auto;
+      cursor: default;
+    }
+
+    #boss-overlay.active {
+      display: block;
+    }
+
+    #boss-toolbar {
+      background: #217346;
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #boss-toolbar span {
+      opacity: 0.8;
+      font-size: 11px;
+    }
+
+    #boss-formula {
+      background: #f3f3f3;
+      border-bottom: 1px solid #d4d4d4;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #boss-formula em {
+      font-style: normal;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 2px 6px;
+      min-width: 40px;
+      display: inline-block;
+    }
+
+    #boss-formula code {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 2px 8px;
+      flex: 1;
+      font-family: Calibri, sans-serif;
+    }
+
+    #boss-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #boss-table th,
+    #boss-table td {
+      border: 1px solid #d4d4d4;
+      padding: 3px 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    #boss-table th {
+      background: #f3f3f3;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    #boss-table td:first-child,
+    #boss-table th:first-child {
+      background: #f9f9f9;
+      text-align: left;
+      font-weight: 500;
+      color: #333;
+    }
+
+    #boss-table tr.section-header td {
+      background: #e8e8e8;
+      font-weight: 700;
+      text-align: left;
+      color: #1a1a1a;
+    }
+
+    #boss-table tr.total td {
+      font-weight: 700;
+      border-top: 2px solid #888;
+    }
+
+    #boss-table td.negative {
+      color: #c00;
+    }
+
+    #boss-table td.selected {
+      outline: 2px solid #217346;
+      background: #e8f5e9;
+    }
+
+    #boss-sheets {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f3f3f3;
+      border-top: 1px solid #d4d4d4;
+      padding: 4px 8px;
+      display: flex;
+      gap: 2px;
+      z-index: 10000;
+    }
+
+    #boss-sheets .tab {
+      padding: 4px 14px;
+      font-size: 11px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: default;
+    }
+
+    #boss-sheets .tab.active {
+      background: #fff;
+      border-bottom: 2px solid #217346;
+      font-weight: 600;
+    }
+
+    /* === Flag Marquee === */
+    #flags {
+      display: none;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 600px;
+      overflow: hidden;
+      margin-top: 16px;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    }
+
+    body.yes #flags {
+      display: block;
+    }
+
+    #flags-track {
+      display: flex;
+      gap: 12px;
+      white-space: nowrap;
+      font-size: clamp(20px, 4vw, 32px);
+      animation: flagScroll 30s linear infinite;
+    }
+
+    @keyframes flagScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #flags-track {
+        animation: none;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+
+    /* === Mobile Polish === */
+    body.yes {
+      touch-action: manipulation;
+    }
+
+    /* === Landscape: prevent clipping on short viewports === */
+    @media (orientation: landscape) and (max-height: 500px) {
+      #answer {
+        font-size: clamp(60px, 15vh, 140px);
+      }
+    }
+
+    /* === Reduced Motion === */
+    @media (prefers-reduced-motion: reduce) {
+      body.yes {
+        animation: none;
+      }
+
+      body.yes #answer {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+
+      body.yes #answer::before,
+      body.yes #answer::after {
+        animation: none;
+        opacity: 1;
+        transform: translateX(-50%);
+      }
+
+      body.yes #answer.shake {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles"></canvas>
+  <div id="answer"><svg id="trophy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#D4AF37"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.133 1.59-.388 2.885-.72 3.935M3.504 1q.01.775.056 1.469c.13 2.028.457 3.546.87 4.667C5.294 9.48 6.484 10 7 10a.5.5 0 0 1 .5.5v2.61a1 1 0 0 1-.757.97l-1.426.356a.5.5 0 0 0-.179.085L4.5 15h7l-.638-.479a.5.5 0 0 0-.18-.085l-1.425-.356a1 1 0 0 1-.757-.97V10.5A.5.5 0 0 1 9 10c.516 0 1.706-.52 2.57-2.864.413-1.12.74-2.64.87-4.667q.045-.694.056-1.469z"/></svg><noscript>NO</noscript></div>
+  <div id="subtitle"></div>
+  <div id="flags"><div id="flags-track"></div></div>
+  <div id="chant-toast"></div>
+  <div id="countdown"></div>
+  <button id="boss-btn" aria-label="Boss mode">Boss Mode</button>
+  <div id="boss-overlay"></div>
+  <div id="copyright">&copy; 2026 Chris Ballance</div>
+
+  <script>
+    /* === World Cup Schedule === */
+    const WORLD_CUPS = [
+      { start: new Date(2026, 5, 11), end: new Date(2026, 6, 19, 23, 59, 59), label: 'FIFA World Cup 2026', hosts: 'USA, Canada, Mexico' },
+      { start: new Date(2030, 5, 1),  end: new Date(2030, 6, 15, 23, 59, 59), label: 'FIFA World Cup 2030', hosts: 'Morocco, Spain, Portugal' },
+    ];
+
+    /* === Motion Preference === */
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* === Canvas Setup === */
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    /* === Particle System === */
+    const isMobile = window.innerWidth < 768;
+    const BALL_COUNT = isMobile ? 15 : 30;
+    const CONFETTI_COUNT = isMobile ? 10 : 20;
+    const FLAG_COLORS = ['#006847', '#ffffff', '#ce1126', '#002868', '#bf0a30', '#FFD700', '#000000', '#009739', '#ff0000'];
+    const particles = [];
+    const sparkles = [];
+
+    /* === Soccer Ball Particles === */
+    function createBall() {
+      return {
+        type: 'ball',
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        size: 16 + Math.random() * 24,
+        speed: 25 + Math.random() * 45,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 1.2,
+        opacity: 0.75 + Math.random() * 0.25,
+        wobbleAmp: 20 + Math.random() * 30,
+        wobbleFreq: 0.5 + Math.random() * 1.5,
+        wobbleOffset: Math.random() * Math.PI * 2,
+      };
+    }
+
+    function recycleBall(p) {
+      p.x = Math.random() * canvas.width;
+      p.y = -p.size * 2;
+      p.size = 16 + Math.random() * 24;
+      p.speed = 25 + Math.random() * 45;
+      p.rotation = Math.random() * Math.PI * 2;
+      p.rotationSpeed = (Math.random() - 0.5) * 1.2;
+      p.opacity = 0.3 + Math.random() * 0.5;
+      p.wobbleOffset = Math.random() * Math.PI * 2;
+    }
+
+    // Soccer ball rendered directly via Canvas Path2D (no Image loading).
+    const BALL_PATH_D = 'm403.47315,263.13611c-10.57629-.864-18.67776-2.63706-27.86944-6.09943-1.16417-.43853-2.35479-.90121-2.64584-1.02821-.29104-.12698-1.01828-.43496-1.61608-.68437-8.23024-3.43383-18.70029-10.14944-25.72419-16.4998-1.15465-1.04392-6.8157-6.70725-7.94797-7.95116-2.12904-2.33897-5.36823-6.47861-7.9362-10.14236-2.47624-3.53288-6.88313-11.55182-8.67581-15.7868-4.08811-9.65769-6.61978-19.52592-7.44398-29.01598-.10954-1.26118-.27632-2.88836-.37064-3.61597-.22057-1.70155-.22099-10.06611-.0006-11.90625.093-.77611.25845-2.44298.36777-3.70416.18912-2.18184 1.24366-9.18323 1.58076-10.49514.0873-.33955.3282-1.37143.53545-2.29306 2.286-10.16595 6.75185-20.6466 12.84093-30.13563 8.28943-12.918 20.24193-24.203359 33.80723-31.920242 5.47144-3.112534 12.96509-6.38598 18.25625-7.974869.7276-.218493 1.78753-.543411 2.35539-.722041 4.44203-1.397313 12.05263-2.83781 17.57656-3.326804 1.21267-.107349 2.95892-.279137 3.88055-.38175 1.61398-.179699 10.37458-.108963 12.52362.101119 5.09157.497735 7.14523.754105 9.96597 1.24411 3.15888.548746 8.12745 1.693625 10.25641 2.363325.56786.17863 1.62779.503548 2.35539.722041 7.15814 2.149525 15.68858 6.174355 22.93056 10.819091 2.37045 1.520318 8.03737 5.628523 9.08682 6.587449.19557.178696.83057.720026 1.41111 1.202956 2.10567 1.751614 6.57596 6.089299 9.09306 8.823335 4.27121 4.63931 8.97034 11.15096 12.47448 17.28611 1.10268 1.93059 3.26884 6.22429 4.3159 8.55486 2.1847 4.86273 4.4181 11.55248 5.5944 16.75694.20832.92163.45225 1.9932.54207 2.38125.55079 2.37952 1.30586 7.40381 1.57725 10.49514.10647 1.21267.27797 2.95892.38112 3.88056.18112 1.61822.10714 10.65789-.10322 12.6118-.0522.48507-.18135 1.75507-.28695 2.82222-1.74507 17.63444-8.24622 34.30419-18.91187 48.49235-4.68474 6.23197-10.82619 12.56085-16.97209 17.49006-13.91417 11.15961-30.63321 18.26648-48.13323 20.46028-5.81458.72893-14.19137.98766-19.07094.58903zm14.11112-5.18285c3.43553-.30787 7.27133-.83959 10.17662-1.4107 2.81131-.55263 7.85902-1.82499 8.44762-2.12937.46259-.23922.7737-.88522 1.27042-2.63797.32802-1.15748.24818-1.32284-.63888-1.32323-.40422 0-1.80651-.11532-3.1162-.25585-5.32795-.57171-7.40042-.9579-12.78819-2.38296-1.42598-.37718-4.34633-1.49529-6.04315-2.31375-2.22725-1.0743-4.18341-2.33832-6.1011-3.94237-.76149-.63695-1.45624-1.11377-1.54388-1.05961-.0877.0542-.53617.16432-.99673.24477-7.96969 1.39224-8.68258 1.50216-13.18459 2.0329-5.93465.69963-12.68001.77825-15.875.18502-1.88777-.35051-1.95792-.34351-2.16625.21613-.0993.26678-.51359 1.3185-.92059 2.33715-1.14698 2.87068-1.2301 2.50234 1.08332 4.8006l2.00352 1.99037 2.99861 1.00859c7.70708 2.59232 14.08632 3.93226 22.40139 4.70532 2.70391.25139 11.90747.21147 14.99306-.065zm-48.92851-11.1718c.28547-.29944 1.24124-2.58701 2.04061-4.88401l.42968-1.23473-.67159-.55997c-.36937-.30799-1.88232-1.56222-3.36212-2.78718-4.19475-3.4724-8.75104-8.14136-11.70913-11.99868-2.89803-3.77901-5.83696-9.58785-6.39416-12.63818-.1497-.81946-.25705-.89755-1.96654-1.43038-7.60705-2.37103-14.31761-7.45-18.70044-14.15366-.57085-.87313-1.06815-1.62719-1.10513-1.67569-.1406-.18446-1.3056 1.35863-1.8301 2.42405-.65746 1.33547-.8256 2.61975-.44997 3.43677.146.31755.60688 1.37112 1.02418 2.34126 1.68345 3.91365 4.4506 8.97395 7.13772 13.05278 1.43955 2.18512 4.21704 6.03964 5.17174 7.17719 4.91624 5.85787 9.92431 10.82509 14.66722 14.54761 3.97245 3.1178 8.37821 6.07264 11.99445 8.04437.53358.29093 1.04951.6043 1.14653.69641.27442.26051 2.24891-.0137 2.57705-.35796zm73.48537-1.46583c1.76635-.5658 3.9844-1.38846 5.69383-2.11179 1.33296-.56403 6.08487-2.98505 7.05556-3.59469 3.31165-2.07988 5.43871-3.60855 8.08036-5.8072 3.15199-2.6234 7.52352-7.35469 8.3132-8.99733.35381-.73597 1.22994-3.95939 1.68258-6.19051 1.43208-7.05873 1.52354-14.55428.25203-20.65501l-.37128-1.7814-1.7024-.56955c-2.5757-.8617-8.01156-2.7871-11.49199-4.0705-.82462-.30408-2.21368-.81483-3.08681-1.13502-2.9138-1.06853-6.85069-2.53151-9.65659-3.58847-2.44416-.92069-2.80396-1.01391-2.99861-.77692-.89447 1.08904-8.64506 7.89098-10.89116 9.55812-.32676.24254-.95688.72184-1.40026 1.06511-4.58355 3.54867-10.56796 7.279-15.91059 9.91774l-3.28638 1.62314-.11262 1.41402c-.17602 2.2098-.52876 7.66491-.98679 15.26055-.33838 5.61137-.57136 11.80361-.45906 12.20098.12388.43832 1.94219 2.05186 3.16127 2.80526 4.62553 2.85861 11.12139 4.72776 19.52204 5.61734 2.83149.29985 2.95562.30828 4.98088.33847 1.68148.025 2.08698-.0336 3.61279-.52234zm38.19435-21.26753 1.89705-.4614 1.21557-1.61019c11.55154-15.30157 17.94742-33.47469 18.63456-52.94791.13626-3.86144.0458-4.23324-1.35753-5.58011l-1.05676-1.01424h-2.96219-2.96218l-.31567.83785c-.96548 2.56267-4.90731 10.51465-8.37203 16.88924-.26365.48507-.77825 1.43757-1.14357 2.11666-.36532.6791-.80327 1.47285-.97323 1.76389-.16997.29104-.56499 1.00542-.87784 1.5875-.31284.58209-1.56052 2.82334-2.77261 4.98056l-2.20381 3.92224.2109.92846c.72674 3.19958 1.00251 5.16818 1.239 8.84464.2577 4.00631-.0114 8.82684-.71513 12.80952-.40278 2.27951-.92322 4.66168-1.30648 5.97994-.22621.77806-.36189 1.46497-.30152 1.52647.18151.18491 2.1073-.0828 4.12347-.57312zm-166.89921-37.74587c6.70906-6.21015 11.22181-10.46941 15.0983-14.25021 1.84326-1.79776 3.81681-3.76048 4.38566-4.36159l1.03427-1.09293-.36017-1.90568c-.63644-3.36743-1.10978-7.80117-1.4369-13.45915-.10376-1.79476-.26447-4.37445-.35712-5.73264-.0927-1.3582-.17999-3.73945-.19408-5.29167-.0141-1.55222-.076-4.36409-.13753-6.24859l-.11191-3.42637-6.4382-4.45729c-3.541-2.4515-6.79538-4.70411-7.23194-5.00579-2.93365-2.02723-8.82943-5.96346-9.07114-6.05621-.38753-.14872-2.069.43056-4.29195 1.47862-5.23998 2.47047-9.76153 6.49981-13.44299 11.97957-1.55195 2.31004-2.13467 3.54606-2.30963 4.89904-.74446 5.7569-.76001 5.99965-.77107 12.04049-.0106 5.80776.0626 7.13018.62538 11.28889.0985.72761.24704 1.64042.33018 2.02847.0831.38806.24822 1.18181.36682 1.76389.84027 4.12378 2.29342 8.60341 3.68532 11.36075 2.24012 4.43765 6.79762 9.22894 11.36007 11.9428 2.0438 1.21571 7.129 3.40058 7.94572 3.41389.18465.003.77996-.40572 1.32291-.90829zm60.46643-2.94576c6.30378-2.78158 15.33056-8.56241 21.2582-13.61396 3.83623-3.26924 3.42127-2.90095 6.05703-5.37584l2.23704-2.1005-.1157-1.23932c-.0636-.68163-.19485-2.2712-.29159-3.53238-.0967-1.26118-.21892-2.68993-.27151-3.175-.0526-.48507-.16721-1.83444-.25471-2.99861-.0875-1.16416-.2432-3.02948-.34601-4.14514-.10281-1.11566-.262-2.98097-.35375-4.14514-.0918-1.16416-.24365-2.98979-.33754-4.05694-.0939-1.06715-.29642-3.36903-.45007-5.11528-.15364-1.74625-.35683-4.04812-.45152-5.11528-.0947-1.06715-.25396-2.92346-.35392-4.12513-.1-1.20167-.25499-2.32169-.3445-2.48894-.1915-.35781-3.86219-2.79099-6.25357-4.14529-3.26954-1.85161-8.0791-4.13629-12.00295-5.70176-3.31235-1.32149-4.23505-1.65991-7.32014-2.68481-4.71455-1.56623-5.64228-1.81376-6.06899-1.61933-.56303.25656-12.94278 8.29247-17.31519 11.2396-6.63772 4.47401-12.08765 8.45607-13.88197 10.14303l-1.03188.97013.1874 6.08542c.10307 3.34698.30723 8.18885.4537 10.75972.14646 2.57087.30907 5.58712.36134 6.70278.21308 4.54766 1.0799 11.03702 1.55784 11.6626.10746.14065.47319.42063.81274.62217.33955.20154 2.12549 1.27889 3.96875 2.39412 3.80326 2.30107 8.73147 5.17031 12.87639 7.4967 5.00195 2.80741 6.51957 3.62039 9.87778 5.29147 1.55223.7724 3.37785 1.62411 4.05695 1.89268.67909.26857 1.39347.55369 1.5875.6336.51963.214.47654.22431 2.15285-.51537zm88.27244-46.72153c.93382-1.4699 1.38512-2.43427 1.38512-2.9597 0-.25397-.15668-1.34853-.3482-2.43237-.60987-3.45153-.67841-3.78372-1.44378-6.9977-.81908-3.43954-2.93783-9.87781-4.31135-13.10101-.34008-.79809-.75301-1.76635-.91758-2.15169-.4759-1.11429-2.75884-5.68394-3.65952-7.32508-3.76552-6.86127-8.73841-13.5429-14.47359-19.44687l-2.35601-2.425348h-.94106c-.51758 0-1.37236.07368-1.8995.163748-.52714.0901-1.41976.21545-1.9836.27864-.57552.0645-1.06311.21378-1.11168.34035-.0476.12401.29882 1.01065.7698 1.97032 3.48388 7.09886 5.44706 15.84238 5.08492 22.64694l-.11734 2.20486 1.25685 1.23472c4.45597 4.37754 9.46236 11.50506 14.0671 20.02712.8706 1.61126 3.56365 6.98859 4.08215 8.15101l.37371.83784 2.95011-.002 2.9501-.002.64335-1.0127zm-156.25016-10.74715c4.62476-6.96751 10.6164-11.93697 17.55552-14.56053l2.00573-.75833.47673-2.39251c.83234-4.17721 2.24197-8.81562 3.51534-11.56725.19031-.41126.34602-.79522.34602-.85325 0-.20131 2.45563-5.02794 2.81437-5.53175.19835-.27855.36063-.56198.36063-.62985 0-.20225 2.61213-3.95892 3.67844-5.2902.54393-.6791 1.96725-2.23949 3.16293-3.46753l2.17396-2.23281-1.41407-2.706081-1.41407-2.70608-1.55019.02372c-2.36669.03621-2.6928.17873-5.26034 2.298838-2.78213 2.297299-9.08655 8.574193-11.39736 11.347583-3.88539 4.66319-7.16681 9.40181-10.07708 14.55208-1.08066 1.91243-4.19123 8.40985-5.02444 10.49514-1.47592 3.69382-3.28354 9.30502-4.00275 12.42529-.10956.47533-.006.62759 1.23356 1.80798.74426.70892 1.45207 1.28895 1.57291 1.28895.12084 0 .68072-.69453 1.24416-1.54341zm117.22737-8.74751c1.10559-.51827 2.28798-1.06697 2.62753-1.21934.96077-.43113 8.47502-3.4828 8.57584-3.4828.0494 0 .52365-.19843 1.05388-.44097.53024-.24253 1.018-.44097 1.08392-.44097.0659 0 1.43278-.50735 3.03748-1.12744 1.6047-.62008 3.71138-1.41983 4.68152-1.77721.97014-.35737 1.92264-.71608 2.11667-.79712.19402-.081 1.11985-.43576 2.05738-.78824l1.70461-.64089.11632-1.4474c.30845-3.83836-.62109-9.8885-2.28404-14.86623-1.35245-4.04829-3.85102-9.09048-5.07839-10.24833-2.11363-1.99392-9.11363-6.983852-12.14614-8.658351-9.87498-5.45278-18.26753-7.548605-24.93919-6.227934-7.76628 1.537354-14.19318 4.212307-19.05 7.928835-1.25343.95915-3.9232 3.486996-4.1702 3.948521-.12878.240635.16853 1.695969 1.1544 5.650799 1.59292 6.39002 4.44273 18.0293 4.71603 19.26141.38039 1.71489.45116 1.81237 1.5373 2.11769 4.21196 1.18397 12.40018 4.19405 16.6705 6.12826 4.5672 2.06866 9.63971 4.85408 12.90031 7.08382.77611.53074 1.45903.96975 1.5176.97559.0586.006 1.01107-.41343 2.11667-.9317zm-81.36766-45.194195c3.20234-.793924 4.70363-1.104634 8.90764-1.843528 5.26312-.925044 9.4734-1.351921 13.33399-1.351921 2.9875 0 4.47717.142258 6.74617.644231l1.29474.286438 1.52109-1.479571c.8366-.813763 1.56366-1.523371 1.61567-1.576905 1.06545-1.096465 4.83546-3.627636 7.4944-5.031725 4.24713-2.242752 10.12144-4.238281 14.737-5.006218 1.8502-.307839 1.819-.29265 1.68643-.820843-.23233-.92567-2.0136-4.451504-2.33001-4.611999-.31862-.161617-2.2975-.392218-6.42132-.748287-4.28614-.370083-12.32453-.133023-17.54136.517312-10.645 1.327015-20.43002 4.328984-30.33889 9.307736-3.30869 1.662467-3.68364 1.90804-4.46919 2.927133-.9909 1.285472-1.969 2.950922-1.969 3.352672 0 .186103.5451 1.381397 1.21134 2.656211.66624 1.274813 1.34506 2.579851 1.50848 2.900083.20663.404889.38836.555086.59664.493092.16473-.04903 1.25201-.325291 2.41618-.613911z';
+    const ballSpriteSize = 256;
+    const ballSprite = document.createElement('canvas');
+    ballSprite.width = ballSpriteSize;
+    ballSprite.height = ballSpriteSize;
+    let ballSpriteReady = false;
+    (function renderBallSprite() {
+      const sCtx = ballSprite.getContext('2d');
+      const scale = ballSpriteSize / 194;
+      sCtx.save();
+      sCtx.scale(scale, scale);
+      // White circle background
+      sCtx.beginPath();
+      sCtx.arc(97, 97, 95, 0, Math.PI * 2);
+      sCtx.fillStyle = '#f0f0f0';
+      sCtx.fill();
+      sCtx.strokeStyle = '#555';
+      sCtx.lineWidth = 2;
+      sCtx.stroke();
+      // Clip to circle, then draw black path with SVG transform
+      sCtx.beginPath();
+      sCtx.arc(97, 97, 95, 0, Math.PI * 2);
+      sCtx.clip();
+      sCtx.translate(-313.077, -69.35);
+      sCtx.fillStyle = '#000';
+      var ballPath2D = new Path2D(BALL_PATH_D);
+      sCtx.fill(ballPath2D);
+      sCtx.restore();
+      ballSpriteReady = true;
+    })();
+
+    function drawBall(p) {
+      if (!ballSpriteReady) return;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.globalAlpha = p.opacity;
+      const d = p.size * 2;
+      ctx.drawImage(ballSprite, -p.size, -p.size, d, d);
+      ctx.restore();
+    }
+
+    /* === Confetti Particles === */
+    function createConfetti() {
+      return {
+        type: 'confetti',
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        width: 4 + Math.random() * 6,
+        height: 8 + Math.random() * 12,
+        speed: 20 + Math.random() * 40,
+        opacity: 0.4 + Math.random() * 0.5,
+        wobbleAmp: 15 + Math.random() * 25,
+        wobbleFreq: 0.3 + Math.random() * 1.0,
+        wobbleOffset: Math.random() * Math.PI * 2,
+        color: FLAG_COLORS[Math.floor(Math.random() * FLAG_COLORS.length)],
+        spinSpeed: 1.5 + Math.random() * 2.5,
+        spinOffset: Math.random() * Math.PI * 2,
+        tumbleSpeed: 2 + Math.random() * 3,
+        tumbleOffset: Math.random() * Math.PI * 2,
+      };
+    }
+
+    function recycleConfetti(p) {
+      p.x = Math.random() * canvas.width;
+      p.y = -p.height * 2;
+      p.width = 4 + Math.random() * 6;
+      p.height = 8 + Math.random() * 12;
+      p.speed = 20 + Math.random() * 40;
+      p.wobbleOffset = Math.random() * Math.PI * 2;
+      p.color = FLAG_COLORS[Math.floor(Math.random() * FLAG_COLORS.length)];
+    }
+
+    function drawConfetti(p) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.globalAlpha = p.opacity;
+
+      // 3D flip effect (horizontal scale oscillation)
+      const spin = Math.cos(elapsedTime * p.spinSpeed + p.spinOffset);
+      const tumble = Math.sin(elapsedTime * p.tumbleSpeed + p.tumbleOffset);
+      ctx.scale(Math.abs(spin) * 0.8 + 0.2, 1);
+      ctx.rotate(tumble * 0.5);
+
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.width / 2, -p.height / 2, p.width, p.height);
+
+      ctx.restore();
+    }
+
+    /* === Sparkle Burst System === */
+    function spawnSparkles(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+        const speed = 80 + Math.random() * 120;
+        sparkles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: 3 + Math.random() * 4,
+          life: 0,
+          maxLife: 0.4 + Math.random() * 0.3,
+          rotation: Math.random() * Math.PI * 2,
+          color: Math.random() > 0.5 ? '#FFD700' : '#ffffff',
+        });
+      }
+    }
+
+    function drawSparkle(s) {
+      const progress = s.life / s.maxLife;
+      const fade = 1 - progress;
+      const scale = 1 - progress * 0.6;
+
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rotation + s.life * 3);
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = s.color;
+
+      // Star/diamond shape
+      const sz = s.size * scale;
+      ctx.beginPath();
+      ctx.moveTo(0, -sz);
+      ctx.lineTo(sz * 0.4, -sz * 0.4);
+      ctx.lineTo(sz, 0);
+      ctx.lineTo(sz * 0.4, sz * 0.4);
+      ctx.lineTo(0, sz);
+      ctx.lineTo(-sz * 0.4, sz * 0.4);
+      ctx.lineTo(-sz, 0);
+      ctx.lineTo(-sz * 0.4, -sz * 0.4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function initParticles() {
+      particles.length = 0;
+      sparkles.length = 0;
+      for (let i = 0; i < BALL_COUNT; i++) {
+        const p = createBall();
+        p.y = Math.random() * canvas.height;
+        particles.push(p);
+      }
+      for (let i = 0; i < CONFETTI_COUNT; i++) {
+        const c = createConfetti();
+        c.y = Math.random() * canvas.height;
+        particles.push(c);
+      }
+    }
+
+    /* === World Cup 2026 Teams & Flag Emojis === */
+    const WC_TEAMS = [
+      'US','MX','CA','FR','ES','DE','PT','NL','BE','HR','AT','CH','NO',
+      'AR','BR','CO','UY','EC','PY',
+      'JP','KR','AU','IR','SA','QA','JO','UZ',
+      'MA','SN','CI','ZA','EG','DZ','TN','GH','CV',
+      'PA','HT','CW','NZ',
+    ];
+    // England & Scotland use subdivision flag sequences
+    const ENGLAND_FLAG = '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F';
+    const SCOTLAND_FLAG = '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F';
+
+    function codeToFlag(code) {
+      return String.fromCodePoint(...[...code.toUpperCase()].map(function(c) { return c.charCodeAt(0) + 127397; }));
+    }
+
+    function buildFlagStrip() {
+      var flags = [ENGLAND_FLAG, SCOTLAND_FLAG];
+      for (var i = 0; i < WC_TEAMS.length; i++) {
+        flags.push(codeToFlag(WC_TEAMS[i]));
+      }
+      return flags;
+    }
+
+    function populateFlags() {
+      var track = document.getElementById('flags-track');
+      var flags = buildFlagStrip();
+      var html = '';
+      // Double for seamless infinite scroll
+      for (var r = 0; r < 2; r++) {
+        for (var i = 0; i < flags.length; i++) {
+          html += '<span>' + flags[i] + '</span>';
+        }
+      }
+      track.innerHTML = html;
+    }
+
+    /* === Celebration Lifecycle === */
+    let celebrationActive = false;
+    let lastFrameTime = 0;
+    let elapsedTime = 0;
+
+    const GREETINGS = [
+      'GOOOOOL!',
+      'The Beautiful Game!',
+      'Joga Bonito!',
+      "It\u2019s Coming Home!",
+      'Allez les Bleus!',
+      'Ole Ole Ole!',
+      'Vamos!',
+      'Forza!',
+      'The world is watching!',
+    ];
+
+    function startCelebration() {
+      if (celebrationActive) return;
+      celebrationActive = true;
+      elapsedTime = 0;
+
+      const answerDiv = document.getElementById('answer');
+      // Preserve the trophy SVG element, replace only text content
+      const trophyIcon = document.getElementById('trophy-icon');
+      answerDiv.textContent = 'YES!';
+      if (trophyIcon) answerDiv.insertBefore(trophyIcon, answerDiv.firstChild);
+      document.getElementById('countdown').textContent = '';
+      document.body.classList.add('yes');
+
+      const subtitleEl = document.getElementById('subtitle');
+      subtitleEl.textContent = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+      setTimeout(function() { subtitleEl.classList.add('visible'); }, 1000);
+
+      populateFlags();
+
+      if (!prefersReducedMotion) {
+        initParticles();
+        requestAnimationFrame(tick);
+      }
+    }
+
+    function stopCelebration() {
+      celebrationActive = false;
+      particles.length = 0;
+      sparkles.length = 0;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.body.classList.remove('yes');
+      document.getElementById('subtitle').classList.remove('visible');
+      document.getElementById('chant-toast').classList.remove('visible');
+    }
+
+    /* === Animation Loop === */
+    function tick(timestamp) {
+      if (!celebrationActive) return;
+
+      const deltaTime = lastFrameTime ? Math.min((timestamp - lastFrameTime) / 1000, 0.05) : 0;
+      lastFrameTime = timestamp;
+      elapsedTime += deltaTime;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        p.y += p.speed * deltaTime;
+        p.x += Math.sin(elapsedTime * p.wobbleFreq + p.wobbleOffset) * p.wobbleAmp * deltaTime;
+
+        if (p.type === 'ball') {
+          p.rotation += p.rotationSpeed * deltaTime;
+          if (p.y > canvas.height + p.size * 2) {
+            if (p.pourExtra) {
+              particles.splice(i, 1);
+              i--;
+              continue;
+            }
+            recycleBall(p);
+          }
+          drawBall(p);
+        } else if (p.type === 'confetti') {
+          if (p.y > canvas.height + p.height * 2) {
+            if (p.pourExtra) {
+              particles.splice(i, 1);
+              i--;
+              continue;
+            }
+            recycleConfetti(p);
+          }
+          drawConfetti(p);
+        }
+      }
+
+      // Update & draw sparkles
+      for (let i = sparkles.length - 1; i >= 0; i--) {
+        const s = sparkles[i];
+        s.life += deltaTime;
+        if (s.life >= s.maxLife) {
+          sparkles.splice(i, 1);
+          continue;
+        }
+        s.x += s.vx * deltaTime;
+        s.y += s.vy * deltaTime;
+        s.vy += 120 * deltaTime; // gravity
+        drawSparkle(s);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    /* === Date Helpers === */
+    const forceCelebrate = new URLSearchParams(window.location.search).has('celebrate');
+
+    function isWorldCup() {
+      if (forceCelebrate) return true;
+      const now = new Date();
+      for (const wc of WORLD_CUPS) {
+        if (now >= wc.start && now <= wc.end) return true;
+      }
+      return false;
+    }
+
+    function getNextWorldCup() {
+      const now = new Date();
+      for (const wc of WORLD_CUPS) {
+        if (now < wc.start) return wc;
+        if (now >= wc.start && now <= wc.end) return wc;
+      }
+      return WORLD_CUPS[WORLD_CUPS.length - 1];
+    }
+
+    function formatCountdown(ms, label) {
+      const ONE_DAY = 86400000;
+      const ONE_HOUR = 3600000;
+      const ONE_MINUTE = 60000;
+      const ONE_SECOND = 1000;
+
+      const days = Math.floor(ms / ONE_DAY);
+      const hours = Math.floor((ms % ONE_DAY) / ONE_HOUR);
+      const minutes = Math.floor((ms % ONE_HOUR) / ONE_MINUTE);
+      const seconds = Math.floor((ms % ONE_MINUTE) / ONE_SECOND);
+
+      const parts = [];
+      if (days > 0) parts.push(days + ' day' + (days !== 1 ? 's' : ''));
+      if (hours > 0) parts.push(hours + ' hour' + (hours !== 1 ? 's' : ''));
+      if (minutes > 0) parts.push(minutes + ' minute' + (minutes !== 1 ? 's' : ''));
+      if (seconds > 0) parts.push(seconds + ' second' + (seconds !== 1 ? 's' : ''));
+
+      return parts.join(', ') + ' until ' + label;
+    }
+
+    /* === Main Update Loop === */
+    function update() {
+      const answerEl = document.getElementById('answer');
+      const countdownEl = document.getElementById('countdown');
+
+      if (isWorldCup()) {
+        startCelebration();
+      } else {
+        if (celebrationActive) stopCelebration();
+        answerEl.textContent = 'NO';
+        const next = getNextWorldCup();
+        if (next) {
+          const ms = next.start - new Date();
+          countdownEl.textContent = ms > 0 ? formatCountdown(ms, next.label) : '';
+        }
+      }
+    }
+
+    /* === Interaction: Click Sparkles === */
+    document.body.addEventListener('click', function(e) {
+      if (!celebrationActive) return;
+      spawnSparkles(e.clientX, e.clientY, 12);
+    });
+
+    /* === Interaction: YES Click Counter === */
+    let yesClickCount = 0;
+    const answerElement = document.getElementById('answer');
+
+    answerElement.addEventListener('click', function(e) {
+      if (!celebrationActive) return;
+      e.stopPropagation();
+      yesClickCount++;
+      spawnSparkles(e.clientX, e.clientY, 12);
+
+      if (yesClickCount % 5 === 0) {
+        answerElement.classList.remove('shake');
+        void answerElement.offsetWidth;
+        answerElement.classList.add('shake');
+        answerElement.addEventListener('animationend', function handler() {
+          answerElement.classList.remove('shake');
+          answerElement.removeEventListener('animationend', handler);
+        });
+      }
+    });
+
+    /* === Interaction: Rapid Tap Easter Egg === */
+    const tapTimes = [];
+    const chantToastEl = document.getElementById('chant-toast');
+    const CHANTS = ['GOOOOOL!', 'Ol\u00e9 Ol\u00e9 Ol\u00e9!', 'Vamos!', 'Forza!'];
+
+    document.body.addEventListener('click', function(e) {
+      if (!celebrationActive) return;
+      const now = Date.now();
+      tapTimes.push(now);
+      while (tapTimes.length > 0 && now - tapTimes[0] > 1500) tapTimes.shift();
+
+      if (tapTimes.length >= 4) {
+        tapTimes.length = 0;
+        document.body.classList.add('inverted');
+        chantToastEl.textContent = CHANTS[Math.floor(Math.random() * CHANTS.length)];
+        chantToastEl.classList.add('visible');
+
+        setTimeout(function() {
+          document.body.classList.remove('inverted');
+          chantToastEl.classList.remove('visible');
+        }, 2000);
+      }
+    });
+
+    /* === Interaction: Hold to Pour === */
+    let holdTimer = null;
+    let holdActive = false;
+    let pourTimeout = null;
+
+    function startHold() {
+      if (!celebrationActive) return;
+      holdTimer = setTimeout(function() {
+        holdActive = true;
+        answerElement.style.transition = 'transform 0.3s ease';
+        answerElement.style.transform = 'rotate(5deg)';
+
+        const pourInterval = setInterval(function() {
+          if (!holdActive) return;
+          for (let i = 0; i < 5; i++) {
+            const p = createBall();
+            p.speed = 80 + Math.random() * 100;
+            p.pourExtra = true;
+            particles.push(p);
+          }
+        }, 100);
+
+        pourTimeout = setTimeout(function() {
+          clearInterval(pourInterval);
+          endHold();
+        }, 3000);
+      }, 500);
+    }
+
+    function endHold() {
+      clearTimeout(holdTimer);
+      holdTimer = null;
+      holdActive = false;
+      answerElement.style.transform = '';
+      if (pourTimeout) {
+        clearTimeout(pourTimeout);
+        pourTimeout = null;
+      }
+    }
+
+    answerElement.addEventListener('mousedown', startHold);
+    answerElement.addEventListener('mouseup', endHold);
+    answerElement.addEventListener('mouseleave', endHold);
+    answerElement.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      startHold();
+    });
+    answerElement.addEventListener('touchend', endHold);
+    answerElement.addEventListener('touchcancel', endHold);
+
+    /* === Boss Mode === */
+    var bossActive = false;
+    var bossOverlay = document.getElementById('boss-overlay');
+    var bossBtn = document.getElementById('boss-btn');
+
+    function fmt(n) {
+      return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function fmtPct(n) {
+      return (n > 0 ? '+' : '') + n.toFixed(1) + '%';
+    }
+
+    function generateSpreadsheet() {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var qLabels = ['Q1 FY26','Q2 FY26','Q3 FY26','Q4 FY26','Q1 FY27 (Proj)'];
+
+      // Generate plausible revenue lines
+      var lines = [
+        { name: 'SaaS Subscriptions', base: 2840000, growth: 0.04 },
+        { name: 'Enterprise Licenses', base: 1560000, growth: 0.02 },
+        { name: 'Professional Services', base: 720000, growth: 0.01 },
+        { name: 'Support & Maintenance', base: 480000, growth: 0.03 },
+        { name: 'Training & Certification', base: 195000, growth: 0.05 },
+      ];
+
+      var expenses = [
+        { name: 'Cost of Revenue', pct: 0.32 },
+        { name: 'Sales & Marketing', pct: 0.22 },
+        { name: 'Research & Development', pct: 0.18 },
+        { name: 'General & Administrative', pct: 0.09 },
+        { name: 'Depreciation & Amortization', pct: 0.04 },
+      ];
+
+      // Build quarter data
+      var revData = lines.map(function(l) {
+        var vals = [];
+        for (var q = 0; q < 5; q++) {
+          var jitter = 1 + (Math.random() - 0.5) * 0.06;
+          vals.push(Math.round(l.base * Math.pow(1 + l.growth, q) * jitter));
+        }
+        return { name: l.name, vals: vals };
+      });
+
+      var totalRevByQ = [];
+      for (var q = 0; q < 5; q++) {
+        var t = 0;
+        for (var i = 0; i < revData.length; i++) t += revData[i].vals[q];
+        totalRevByQ.push(t);
+      }
+
+      var expData = expenses.map(function(e) {
+        var vals = totalRevByQ.map(function(r) {
+          return Math.round(r * e.pct * (1 + (Math.random() - 0.5) * 0.04));
+        });
+        return { name: e.name, vals: vals };
+      });
+
+      var totalExpByQ = [];
+      for (var q = 0; q < 5; q++) {
+        var t = 0;
+        for (var i = 0; i < expData.length; i++) t += expData[i].vals[q];
+        totalExpByQ.push(t);
+      }
+
+      var ebitda = totalRevByQ.map(function(r, i) { return r - totalExpByQ[i]; });
+
+      // Selected cell
+      var selRow = 3;
+      var selCol = 3;
+
+      var html = '';
+      html += '<div id="boss-toolbar"><b>Meridian Analytics Corp</b> <span>FY2026 Consolidated P&L — CONFIDENTIAL</span><span id="boss-close" style="margin-left:auto;cursor:pointer;font-size:18px;opacity:0.7;padding:0 4px" title="Close">&times;</span></div>';
+      html += '<div id="boss-formula"><em>D5</em> <code>=SUM(D2:D4)*1.03</code></div>';
+      html += '<table id="boss-table">';
+
+      // Header row
+      html += '<tr><th></th>';
+      for (var q = 0; q < 5; q++) html += '<th>' + qLabels[q] + '</th>';
+      html += '<th>YTD</th><th>% YoY</th></tr>';
+
+      // Revenue section header
+      html += '<tr class="section-header"><td colspan="8">Revenue</td></tr>';
+
+      // Revenue lines
+      for (var i = 0; i < revData.length; i++) {
+        html += '<tr><td>' + revData[i].name + '</td>';
+        var ytd = 0;
+        for (var q = 0; q < 5; q++) {
+          ytd += revData[i].vals[q];
+          var cls = (i === selRow && q === selCol) ? ' class="selected"' : '';
+          html += '<td' + cls + '>$' + fmt(revData[i].vals[q]) + '</td>';
+        }
+        var yoy = 3 + Math.random() * 8;
+        html += '<td>$' + fmt(ytd) + '</td><td>' + fmtPct(yoy) + '</td></tr>';
+      }
+
+      // Total Revenue
+      html += '<tr class="total"><td>Total Revenue</td>';
+      var ytdTotalRev = 0;
+      for (var q = 0; q < 5; q++) {
+        ytdTotalRev += totalRevByQ[q];
+        html += '<td>$' + fmt(totalRevByQ[q]) + '</td>';
+      }
+      html += '<td>$' + fmt(ytdTotalRev) + '</td><td>' + fmtPct(4.2 + Math.random() * 2) + '</td></tr>';
+
+      // Blank row
+      html += '<tr><td colspan="8">&nbsp;</td></tr>';
+
+      // Expenses section header
+      html += '<tr class="section-header"><td colspan="8">Operating Expenses</td></tr>';
+
+      for (var i = 0; i < expData.length; i++) {
+        html += '<tr><td>' + expData[i].name + '</td>';
+        var ytd = 0;
+        for (var q = 0; q < 5; q++) {
+          ytd += expData[i].vals[q];
+          html += '<td>($' + fmt(expData[i].vals[q]) + ')</td>';
+        }
+        html += '<td class="negative">($' + fmt(ytd) + ')</td><td>' + fmtPct(1 + Math.random() * 4) + '</td></tr>';
+      }
+
+      // Total Expenses
+      html += '<tr class="total"><td>Total Operating Expenses</td>';
+      var ytdTotalExp = 0;
+      for (var q = 0; q < 5; q++) {
+        ytdTotalExp += totalExpByQ[q];
+        html += '<td class="negative">($' + fmt(totalExpByQ[q]) + ')</td>';
+      }
+      html += '<td class="negative">($' + fmt(ytdTotalExp) + ')</td><td>' + fmtPct(2.1 + Math.random() * 2) + '</td></tr>';
+
+      // Blank row
+      html += '<tr><td colspan="8">&nbsp;</td></tr>';
+
+      // EBITDA
+      html += '<tr class="total"><td>EBITDA</td>';
+      var ytdEbitda = 0;
+      for (var q = 0; q < 5; q++) {
+        ytdEbitda += ebitda[q];
+        html += '<td>$' + fmt(ebitda[q]) + '</td>';
+      }
+      html += '<td>$' + fmt(ytdEbitda) + '</td><td>' + fmtPct(5 + Math.random() * 6) + '</td></tr>';
+
+      // EBITDA Margin
+      html += '<tr><td>EBITDA Margin</td>';
+      for (var q = 0; q < 5; q++) {
+        html += '<td>' + (ebitda[q] / totalRevByQ[q] * 100).toFixed(1) + '%</td>';
+      }
+      html += '<td>' + (ytdEbitda / ytdTotalRev * 100).toFixed(1) + '%</td><td></td></tr>';
+
+      // More filler rows for realism
+      html += '<tr><td colspan="8">&nbsp;</td></tr>';
+      html += '<tr class="section-header"><td colspan="8">Key Metrics</td></tr>';
+      var metrics = [
+        ['ARR', '$' + fmt(Math.round(totalRevByQ[3] * 4.02))],
+        ['Net Revenue Retention', '112.4%'],
+        ['CAC Payback (months)', '14.2'],
+        ['LTV:CAC Ratio', '3.8x'],
+        ['Gross Margin', '68.3%'],
+        ['Rule of 40', '44.7'],
+        ['Headcount (FTE)', '847'],
+        ['Revenue per Employee', '$' + fmt(Math.round(ytdTotalRev / 847))],
+      ];
+      for (var i = 0; i < metrics.length; i++) {
+        html += '<tr><td>' + metrics[i][0] + '</td><td>' + metrics[i][1] + '</td>';
+        html += '<td colspan="6"></td></tr>';
+      }
+
+      html += '</table>';
+      html += '<div id="boss-sheets">';
+      html += '<div class="tab active">P&L Summary</div>';
+      html += '<div class="tab">Balance Sheet</div>';
+      html += '<div class="tab">Cash Flow</div>';
+      html += '<div class="tab">Revenue Detail</div>';
+      html += '<div class="tab">Headcount</div>';
+      html += '<div class="tab">Board Deck</div>';
+      html += '</div>';
+
+      return html;
+    }
+
+    function toggleBoss() {
+      bossActive = !bossActive;
+      if (bossActive) {
+        bossOverlay.innerHTML = generateSpreadsheet();
+        bossOverlay.classList.add('active');
+        document.body.classList.add('boss-active');
+        document.title = 'FY2026 P&L — Meridian Analytics Corp';
+      } else {
+        bossOverlay.classList.remove('active');
+        bossOverlay.innerHTML = '';
+        document.body.classList.remove('boss-active');
+        document.title = 'Is it the World Cup?';
+      }
+    }
+
+    bossBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleBoss();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && bossActive) {
+        toggleBoss();
+      }
+    });
+
+    bossOverlay.addEventListener('click', function(e) {
+      if (e.target.id === 'boss-close') toggleBoss();
+    });
+
+    /* === Init === */
+    update();
+    setInterval(update, 1000);
+  </script>
+
+</body>
+</html>
