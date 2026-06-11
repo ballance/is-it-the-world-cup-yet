@@ -948,6 +948,8 @@
 
       populateFlags();
 
+      if (window.MatchesPanel) window.MatchesPanel.start();
+
       if (!prefersReducedMotion) {
         initParticles();
         requestAnimationFrame(tick);
@@ -962,6 +964,7 @@
       document.body.classList.remove('yes');
       document.getElementById('subtitle').classList.remove('visible');
       document.getElementById('chant-toast').classList.remove('visible');
+      if (window.MatchesPanel) window.MatchesPanel.stop();
     }
 
     /* === Animation Loop === */
@@ -1561,8 +1564,69 @@
         }
       }
 
-      // Lifecycle hooks wired up in Task 6.
-      window.MatchesPanel = { start: function() {}, stop: function() {}, _render: renderMatches };
+      function showSkeleton() {
+        const list = document.getElementById('matches-list');
+        const header = document.getElementById('matches-header');
+        if (header) header.textContent = '';
+        if (list) {
+          list.innerHTML =
+            '<div class="match match-skeleton">' +
+              '<span></span><span></span><span></span>' +
+            '</div>';
+        }
+      }
+
+      function loadMatches() {
+        if (cache) return Promise.resolve(cache);
+        return fetch(MATCHES_URL)
+          .then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function(data) {
+            cache = data.matches || [];
+            return cache;
+          })
+          .catch(function(err) {
+            console.error('matches.json fetch failed:', err);
+            cache = null;
+            const section = document.getElementById('matches');
+            if (section) section.style.display = 'none';
+            return null;
+          });
+      }
+
+      function start() {
+        const section = document.getElementById('matches');
+        if (section) section.style.display = '';
+        if (renderInterval) clearInterval(renderInterval);
+        showSkeleton();
+        loadMatches().then(function(matches) {
+          if (matches) renderMatches();
+        });
+        renderInterval = setInterval(function() {
+          if (cache) renderMatches();
+        }, 60 * 1000);
+      }
+
+      function stop() {
+        if (renderInterval) {
+          clearInterval(renderInterval);
+          renderInterval = null;
+        }
+        const section = document.getElementById('matches');
+        if (section) {
+          section.style.display = 'none';
+          const list = document.getElementById('matches-list');
+          const message = document.getElementById('matches-message');
+          const header = document.getElementById('matches-header');
+          if (list) list.innerHTML = '';
+          if (message) { message.textContent = ''; message.style.display = 'none'; }
+          if (header) header.textContent = '';
+        }
+      }
+
+      window.MatchesPanel = { start: start, stop: stop };
     })();
 
     /* === Init === */
