@@ -1392,6 +1392,74 @@
       if (e.target.id === 'boss-close') toggleBoss();
     });
 
+    /* === Daily Matches Panel === */
+    (function() {
+      const MATCHES_URL = 'matches.json?v=20260611';
+      let cache = null;
+      let renderInterval = null;
+
+      function getNow() {
+        const params = new URLSearchParams(window.location.search);
+        const d = params.get('date');
+        if (d) {
+          const t = params.get('time') || '12:00:00';
+          return new Date(d + 'T' + t);
+        }
+        return new Date();
+      }
+
+      function getUserTz() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('tz') || undefined;
+      }
+
+      function bucketKey(date, tz) {
+        const opts = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        if (tz) opts.timeZone = tz;
+        return new Intl.DateTimeFormat('en-CA', opts).format(date);
+      }
+
+      function formatPrimaryTime(date, tz) {
+        const opts = { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
+        if (tz) opts.timeZone = tz;
+        return new Intl.DateTimeFormat(undefined, opts).format(date);
+      }
+
+      function formatVenueTime(date, venueTz) {
+        const opts = { hour: 'numeric', minute: '2-digit', timeZone: venueTz };
+        return new Intl.DateTimeFormat(undefined, opts).format(date) + ' local';
+      }
+
+      function formatHeader(date, tz) {
+        const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+        if (tz) opts.timeZone = tz;
+        return 'Today · ' + new Intl.DateTimeFormat(undefined, opts).format(date);
+      }
+
+      function statusFor(kickoff, now) {
+        const ms = now - kickoff;
+        if (ms < 0) return 'upcoming';
+        if (ms < 2 * 60 * 60 * 1000) return 'live';
+        return 'final';
+      }
+
+      function flagFor(code) {
+        if (!code || code === 'TBD') return '🏳️';
+        if (code === 'GB-ENG') return ENGLAND_FLAG;
+        if (code === 'GB-SCT') return SCOTLAND_FLAG;
+        return codeToFlag(code);
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function(c) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+        });
+      }
+
+      // Placeholder — replaced in Task 5 with real render logic.
+      window.MatchesPanel = { start: function() {}, stop: function() {} };
+    })();
+
     /* === Init === */
     update();
     setInterval(update, 1000);
