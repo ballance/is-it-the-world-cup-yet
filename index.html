@@ -1456,8 +1456,113 @@
         });
       }
 
-      // Placeholder — replaced in Task 5 with real render logic.
-      window.MatchesPanel = { start: function() {}, stop: function() {} };
+      function bucketsByDay(matches, tz) {
+        const buckets = {};
+        matches.forEach(function(m) {
+          const key = bucketKey(new Date(m.kickoffUtc), tz);
+          (buckets[key] = buckets[key] || []).push(m);
+        });
+        Object.keys(buckets).forEach(function(k) {
+          buckets[k].sort(function(a, b) {
+            return new Date(a.kickoffUtc) - new Date(b.kickoffUtc);
+          });
+        });
+        return buckets;
+      }
+
+      function isAllTbd(matches) {
+        return matches.every(function(m) {
+          return m.home.code === 'TBD' && m.away.code === 'TBD';
+        });
+      }
+
+      function renderCard(match, now, opts) {
+        opts = opts || {};
+        const kickoff = new Date(match.kickoffUtc);
+        const status = statusFor(kickoff, now);
+        const userTz = getUserTz();
+        const article = document.createElement('article');
+        article.className = 'match';
+        if (status === 'final') article.classList.add('match-final');
+        if (opts.muted) article.classList.add('match-muted');
+
+        const home = match.home;
+        const away = match.away;
+
+        article.innerHTML =
+          '<div class="team home">' +
+            '<span class="flag">' + flagFor(home.code) + '</span>' +
+            '<span class="name">' + escapeHtml(home.name) + '</span>' +
+          '</div>' +
+          '<div class="meta">' +
+            (opts.label ? '<span class="label-tag">' + escapeHtml(opts.label) + '</span>' : '') +
+            '<span class="time-primary">' + escapeHtml(formatPrimaryTime(kickoff, userTz)) + '</span>' +
+            '<span class="time-venue">' + escapeHtml(formatVenueTime(kickoff, match.venue.tz)) + '</span>' +
+            '<span class="venue">' + escapeHtml(match.venue.city + ' · ' + match.stage) + '</span>' +
+            (status === 'live' ? '<span class="badge live" aria-live="polite"><span class="dot"></span>LIVE</span>' : '') +
+            (status === 'final' ? '<span class="badge final">FT</span>' : '') +
+          '</div>' +
+          '<div class="team away">' +
+            '<span class="name">' + escapeHtml(away.name) + '</span>' +
+            '<span class="flag">' + flagFor(away.code) + '</span>' +
+          '</div>';
+        return article;
+      }
+
+      function showBracketMessage(stage, el) {
+        el.textContent = stage + ' starts tomorrow — matchups set after today\'s matches.';
+        el.style.display = '';
+      }
+
+      function renderMatches() {
+        const section = document.getElementById('matches');
+        const list = document.getElementById('matches-list');
+        const message = document.getElementById('matches-message');
+        const header = document.getElementById('matches-header');
+        if (!section) return;
+
+        if (!cache) {
+          // skeleton handled in Task 6
+          return;
+        }
+
+        list.innerHTML = '';
+        message.textContent = '';
+        message.style.display = 'none';
+
+        const now = getNow();
+        const userTz = getUserTz();
+        const buckets = bucketsByDay(cache, userTz);
+        const todayKey = bucketKey(now, userTz);
+        const todayMatches = buckets[todayKey] || [];
+
+        header.textContent = formatHeader(now, userTz);
+
+        if (todayMatches.length > 0) {
+          if (isAllTbd(todayMatches)) {
+            showBracketMessage(todayMatches[0].stage, message);
+          } else {
+            todayMatches.forEach(function(m) {
+              list.appendChild(renderCard(m, now));
+            });
+          }
+          return;
+        }
+
+        // Rest day: walk forward to next non-empty bucket
+        const keys = Object.keys(buckets).sort();
+        const nextKey = keys.find(function(k) { return k > todayKey; });
+        if (!nextKey) return;
+        const nextMatches = buckets[nextKey];
+        if (isAllTbd(nextMatches)) {
+          showBracketMessage(nextMatches[0].stage, message);
+        } else {
+          list.appendChild(renderCard(nextMatches[0], now, { muted: true, label: 'Next match' }));
+        }
+      }
+
+      // Lifecycle hooks wired up in Task 6.
+      window.MatchesPanel = { start: function() {}, stop: function() {}, _render: renderMatches };
     })();
 
     /* === Init === */
