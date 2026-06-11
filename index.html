@@ -463,6 +463,189 @@
         animation: none;
       }
     }
+
+    /* === Daily Matches Panel === */
+    #matches {
+      display: none;
+      position: relative;
+      z-index: 1;
+      width: 92%;
+      max-width: 640px;
+      margin-top: 16px;
+      color: #fff;
+    }
+
+    body.yes #matches {
+      display: block;
+    }
+
+    #matches-header {
+      font-size: clamp(11px, 1.5vw, 13px);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #FFD700;
+      opacity: 0.9;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    #matches-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .match {
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .match-final { opacity: 0.7; }
+    .match-muted { opacity: 0.85; }
+
+    .match .team {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: clamp(13px, 2vw, 16px);
+      font-weight: 600;
+      min-width: 0;
+    }
+
+    .match .team .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .match .team.away { justify-content: flex-end; }
+    .match .team.home { justify-content: flex-end; }
+    .match .team.away .name { text-align: left; }
+    .match .team.home .name { text-align: right; }
+
+    .match .flag { font-size: clamp(20px, 3vw, 26px); }
+
+    .match .meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 110px;
+    }
+
+    .match .label-tag {
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #FFD700;
+      opacity: 0.85;
+    }
+
+    .match .time-primary {
+      font-size: clamp(12px, 1.8vw, 14px);
+      font-weight: 700;
+      color: #FFD700;
+      white-space: nowrap;
+    }
+
+    .match .time-venue {
+      font-size: 10px;
+      opacity: 0.75;
+      white-space: nowrap;
+    }
+
+    .match .venue {
+      font-size: 10px;
+      opacity: 0.7;
+      white-space: nowrap;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .match .badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .match .badge.live {
+      background: rgba(220, 0, 0, 0.85);
+      color: #fff;
+    }
+
+    .match .badge.live .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: livePulse 1.2s ease-in-out infinite;
+    }
+
+    .match .badge.final {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    #matches-message {
+      display: none;
+      text-align: center;
+      font-size: clamp(13px, 2vw, 15px);
+      font-family: Georgia, serif;
+      font-style: italic;
+      color: #8fbc8f;
+      padding: 12px 8px;
+    }
+
+    .match-skeleton {
+      grid-template-columns: 1fr 1fr 1fr;
+      opacity: 0.4;
+    }
+    .match-skeleton span {
+      display: block;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    @media (max-width: 480px) {
+      .match {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+      }
+      .match .team.home { grid-column: 1; grid-row: 1; justify-content: flex-start; }
+      .match .team.home .name { text-align: left; }
+      .match .team.away { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+      .match .team.away .name { text-align: right; }
+      .match .meta {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px 10px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .match .badge.live .dot { animation: none; }
+    }
   </style>
 </head>
 <body>
