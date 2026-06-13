@@ -2551,6 +2551,28 @@
         }
       }
 
+      function celebrateGoal(info) {
+        if (typeof spawnSparkles !== 'function') return;
+        const article = document.querySelector('article.match[data-fifa-id="' + info.fifaId + '"]');
+        if (!article) return;
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) return;
+        if (article._goalTimer) {
+          clearTimeout(article._goalTimer);
+          article.classList.remove('match-goal');
+          void article.offsetWidth; // force reflow so animation restarts
+        }
+        article.classList.add('match-goal');
+        article._goalTimer = setTimeout(function() {
+          article.classList.remove('match-goal');
+          article._goalTimer = null;
+        }, 1500);
+        const rect = article.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        spawnSparkles(cx, cy, 12);
+      }
+
       function loadMatches() {
         if (cache) return Promise.resolve(cache);
         return fetch(MATCHES_URL)
@@ -2596,6 +2618,11 @@
             });
           }
           window.LiveScores.start();
+          if (typeof window.LiveScores.onGoal === 'function') {
+            if (!start._unsubscribeGoal) {
+              start._unsubscribeGoal = window.LiveScores.onGoal(celebrateGoal);
+            }
+          }
         }
       }
 
@@ -2611,6 +2638,10 @@
         if (start._unsubscribeLive) {
           start._unsubscribeLive();
           start._unsubscribeLive = null;
+        }
+        if (start._unsubscribeGoal) {
+          start._unsubscribeGoal();
+          start._unsubscribeGoal = null;
         }
         if (window.LiveScores) window.LiveScores.stop();
         const section = document.getElementById('matches');
