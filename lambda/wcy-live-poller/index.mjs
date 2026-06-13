@@ -34,10 +34,13 @@ async function fetchUpstream() {
   const t = setTimeout(() => controller.abort(), 5000);
   try {
     const res = await fetch(UPSTREAM_URL, {
-      headers: { 'X-Auth-Token': key },
+      headers: { 'X-Auth-Token': key, 'User-Agent': 'wcy-live-poller/1.0' },
       signal: controller.signal,
     });
-    if (!res.ok) throw new Error('upstream HTTP ' + res.status);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '<unreadable>');
+      throw new Error('upstream HTTP ' + res.status + ' body=' + body.slice(0, 200) + ' url=' + UPSTREAM_URL);
+    }
     return await res.json();
   } finally {
     clearTimeout(t);
