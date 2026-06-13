@@ -217,6 +217,39 @@
       opacity: 1;
     }
 
+    /* === My Teams Button === */
+    #myteams-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 2;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #myteams-btn:hover, #myteams-btn:focus-visible {
+      color: rgba(255, 255, 255, 0.85);
+      border-color: rgba(255, 215, 0, 0.5);
+      background: rgba(255, 215, 0, 0.08);
+      outline: none;
+    }
+
+    #myteams-btn .count {
+      font-size: 10px;
+      opacity: 0.85;
+    }
+
     /* === Boss Mode === */
     #boss-btn {
       position: fixed;
@@ -1500,7 +1533,38 @@
         return function() { subscribers.delete(fn); };
       }
 
-      load();
+      function renderButton() {
+        let btn = document.getElementById('myteams-btn');
+        if (!btn) {
+          btn = document.createElement('button');
+          btn.id = 'myteams-btn';
+          btn.setAttribute('aria-label', 'Open team picker');
+          btn.type = 'button';
+          btn.addEventListener('click', function() {
+            if (window.MyTeams && window.MyTeams.openPicker) window.MyTeams.openPicker();
+          });
+          document.body.appendChild(btn);
+        }
+        const favCount = state.favorite ? 1 : 0;
+        const watchCount = state.watchlist.length;
+        let label = '★';
+        if (favCount + watchCount > 0) {
+          label += ' <span class="count">' + favCount + '+' + watchCount + '</span>';
+        }
+        btn.innerHTML = label;
+      }
+
+      function init() {
+        load();
+        renderButton();
+        subscribers.add(renderButton);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
 
       window.MyTeams = {
         get: get,
