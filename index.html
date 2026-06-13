@@ -2263,6 +2263,30 @@
         return function() { subscribers.goal.delete(fn); };
       }
 
+      function ensureAnnounceNode() {
+        let node = document.getElementById('live-sr-announce');
+        if (node) return node;
+        node = document.createElement('div');
+        node.id = 'live-sr-announce';
+        node.className = 'sr-only';
+        node.setAttribute('aria-live', 'polite');
+        node.setAttribute('aria-atomic', 'true');
+        document.body.appendChild(node);
+        return node;
+      }
+
+      function announceGoal(goal) {
+        const node = ensureAnnounceNode();
+        const entry = goal.entry;
+        const sideLabel = goal.scoringTeam === 'home' ? 'home team' : 'away team';
+        const player = entry.lastEvent && entry.lastEvent.player ? entry.lastEvent.player : 'unknown';
+        const minute = entry.minute || '';
+        node.textContent = 'Goal! ' + sideLabel + ' now ' + entry.homeScore + ' to ' + entry.awayScore + ' at ' + minute + ', scored by ' + player + '.';
+      }
+
+      // Wire up — uses onGoal so we only announce on score change
+      subscribers.goal.add(announceGoal);
+
       window.LiveScores = {
         get: get,
         onChange: onChange,
