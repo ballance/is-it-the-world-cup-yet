@@ -767,6 +767,73 @@
       padding: 4px 8px 10px;
       margin: 0;
     }
+    .match-live {
+      grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    }
+    .match-live .team.home { justify-content: flex-end; }
+    .match-live .team.away { justify-content: flex-start; }
+    .match-live .team.home .name { text-align: right; }
+    .match-live .team.away .name { text-align: left; }
+    .match-live .score {
+      font-size: clamp(20px, 2.6vw, 26px);
+      font-weight: 800;
+      color: #FFD700;
+      min-width: 24px;
+      text-align: center;
+    }
+    .match-live .score-sep {
+      font-size: clamp(16px, 2vw, 20px);
+      opacity: 0.5;
+    }
+    .match-live .live-row {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .match-live .live-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      color: #ff5050;
+      letter-spacing: 0.5px;
+    }
+    .match-live .live-status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ff5050;
+      animation: livePulse 1.2s ease-in-out infinite;
+    }
+    .match-live.match-final .live-status {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .match-live.match-final .live-status .dot {
+      display: none;
+    }
+    .match-live .live-row .last-event {
+      opacity: 0.85;
+      font-style: italic;
+    }
+    .match-goal {
+      animation: matchGoalFlash 1.5s ease-out;
+    }
+    @keyframes matchGoalFlash {
+      0%   { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+      30%  { box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.65), 0 4px 28px rgba(255, 215, 0, 0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+    }
+    @media (max-width: 480px) {
+      .match-live { grid-template-columns: 1fr auto auto auto 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .match-goal { animation: none; }
+    }
 
     .match .team {
       display: flex;
@@ -2314,6 +2381,44 @@
           }
         }
 
+        const live = window.LiveScores ? window.LiveScores.get(match.id) : null;
+        article.setAttribute('data-fifa-id', String(match.id));
+
+        if (live) {
+          article.classList.add('match-live');
+          if (live.status === 'FT' || live.status === 'PEN') {
+            article.classList.add('match-final');
+          }
+          const homeButton = home.code === 'TBD'
+            ? '<span class="name">' + escapeHtml(home.name) + '</span>'
+            : '<button type="button" class="name clickable" data-team-code="' + home.code + '" data-team-name="' + escapeHtml(home.name) + '">' + escapeHtml(home.name) + '</button>';
+          const awayButton = away.code === 'TBD'
+            ? '<span class="name">' + escapeHtml(away.name) + '</span>'
+            : '<button type="button" class="name clickable" data-team-code="' + away.code + '" data-team-name="' + escapeHtml(away.name) + '">' + escapeHtml(away.name) + '</button>';
+          const statusText = live.status === 'LIVE' ? 'LIVE ' + live.minute : live.minute;
+          const showDot = live.status === 'LIVE' || live.status === 'ET';
+          const eventText = live.lastEvent && live.lastEvent.type && live.lastEvent.type.indexOf('GOAL') >= 0
+            ? 'Goal: ' + (live.lastEvent.player || 'Unknown') + ' ' + (live.lastEvent.minute || '')
+            : '';
+          article.innerHTML =
+            '<div class="team home">' +
+              homeButton +
+              '<span class="flag">' + flagFor(home.code) + '</span>' +
+            '</div>' +
+            '<div class="score home-score">' + escapeHtml(String(live.homeScore)) + '</div>' +
+            '<div class="score-sep">–</div>' +
+            '<div class="score away-score">' + escapeHtml(String(live.awayScore)) + '</div>' +
+            '<div class="team away">' +
+              '<span class="flag">' + flagFor(away.code) + '</span>' +
+              awayButton +
+            '</div>' +
+            '<div class="live-row">' +
+              '<span class="live-status">' + (showDot ? '<span class="dot"></span>' : '') + escapeHtml(statusText) + '</span>' +
+              (eventText ? '<span class="last-event">' + escapeHtml(eventText) + '</span>' : '') +
+            '</div>';
+          return article;
+        }
+
         article.innerHTML =
           '<div class="team home">' +
             '<span class="flag">' + flagFor(home.code) + '</span>' +
@@ -2484,6 +2589,14 @@
             });
           }
         }
+        if (window.LiveScores && typeof window.LiveScores.onChange === 'function') {
+          if (!start._unsubscribeLive) {
+            start._unsubscribeLive = window.LiveScores.onChange(function() {
+              if (cache) renderMatches();
+            });
+          }
+          window.LiveScores.start();
+        }
       }
 
       function stop() {
@@ -2495,6 +2608,11 @@
           start._unsubscribe();
           start._unsubscribe = null;
         }
+        if (start._unsubscribeLive) {
+          start._unsubscribeLive();
+          start._unsubscribeLive = null;
+        }
+        if (window.LiveScores) window.LiveScores.stop();
         const section = document.getElementById('matches');
         if (section) {
           section.style.display = 'none';
