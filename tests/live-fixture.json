@@ -1,0 +1,29 @@
+{
+  "updatedUtc": "2026-06-13T18:30:00Z",
+  "matches": {
+    "1": {
+      "fifaId": 1,
+      "status": "LIVE",
+      "minute": "67'",
+      "homeScore": 1,
+      "awayScore": 0,
+      "lastEvent": { "type": "GOAL", "team": "home", "minute": "65'", "player": "Jiménez" }
+    },
+    "2": {
+      "fifaId": 2,
+      "status": "FT",
+      "minute": "FT",
+      "homeScore": 2,
+      "awayScore": 2,
+      "lastEvent": { "type": "GOAL", "team": "away", "minute": "88'", "player": "Son" }
+    },
+    "3": {
+      "fifaId": 3,
+      "status": "HT",
+      "minute": "HT",
+      "homeScore": 0,
+      "awayScore": 0,
+      "lastEvent": null
+    }
+  }
+}
