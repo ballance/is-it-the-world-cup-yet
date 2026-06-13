@@ -250,6 +250,163 @@
       opacity: 0.85;
     }
 
+    /* === My Teams Picker Modal === */
+    #myteams-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10002;
+      background: rgba(0, 0, 0, 0.62);
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+      overflow-y: auto;
+      transition: opacity 0.15s ease;
+    }
+    #myteams-overlay.open { display: flex; }
+
+    #myteams-modal {
+      background: #0a1128;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 20px;
+      color: white;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      position: relative;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #myteams-modal h4 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      color: #FFD700;
+      text-align: center;
+    }
+    #myteams-modal .hint {
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 14px;
+    }
+    #myteams-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 20px;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+    #myteams-close:hover, #myteams-close:focus-visible {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      outline: none;
+    }
+
+    #myteams-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    #myteams-grid .tile {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 9px;
+      cursor: pointer;
+      position: relative;
+      color: white;
+      font-family: inherit;
+    }
+    #myteams-grid .tile .flag {
+      font-size: 24px;
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    #myteams-grid .tile[data-state="watch"] {
+      border: 1px solid rgba(255, 215, 0, 0.55);
+    }
+    #myteams-grid .tile[data-state="watch"]::after {
+      content: '•';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      color: #FFD700;
+      font-size: 14px;
+    }
+    #myteams-grid .tile[data-state="fav"] {
+      border: 2px solid #FFD700;
+      background: rgba(255, 215, 0, 0.10);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+    }
+    #myteams-grid .tile[data-state="fav"]::after {
+      content: '★';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      color: #FFD700;
+      font-size: 11px;
+    }
+    #myteams-grid .tile:focus-visible {
+      outline: 2px solid rgba(255, 215, 0, 0.8);
+      outline-offset: 2px;
+    }
+
+    #myteams-counts {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      font-size: 11px;
+      margin-top: 10px;
+      opacity: 0.85;
+    }
+
+    #myteams-toast {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 215, 0, 0.92);
+      color: #0a1128;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    #myteams-toast.visible { opacity: 1; }
+
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #myteams-overlay, #myteams-toast {
+        transition: none;
+      }
+    }
+
     /* === Boss Mode === */
     #boss-btn {
       position: fixed;
@@ -1554,6 +1711,90 @@
         btn.innerHTML = label;
       }
 
+      function openPicker() {
+        let overlay = document.getElementById('myteams-overlay');
+        if (!overlay) overlay = buildPicker();
+        renderTiles();
+        renderCounts();
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        // Focus first tile for keyboard users
+        const firstTile = overlay.querySelector('.tile');
+        if (firstTile) firstTile.focus();
+      }
+
+      function closePicker() {
+        const overlay = document.getElementById('myteams-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        const btn = document.getElementById('myteams-btn');
+        if (btn) btn.focus();
+      }
+
+      // The 48-team roster ordered by group A-L then alphabetical within group.
+      // Filled in Task 4. For now use a placeholder that will be replaced.
+      const ROSTER = [
+        { code: 'MX', name: 'Mexico', group: 'A' },
+        { code: 'US', name: 'United States', group: 'D' },
+      ];
+
+      function buildPicker() {
+        const overlay = document.createElement('div');
+        overlay.id = 'myteams-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML =
+          '<div id="myteams-modal" role="dialog" aria-modal="true" aria-label="Team picker">' +
+            '<button id="myteams-close" type="button" aria-label="Close team picker">&times;</button>' +
+            '<h4>Pick your teams</h4>' +
+            '<p class="hint">Tap once = watchlist · twice = favorite · three times = remove</p>' +
+            '<div id="myteams-grid" role="list"></div>' +
+            '<div id="myteams-counts"></div>' +
+            '<div id="myteams-toast" role="status" aria-live="polite"></div>' +
+          '</div>';
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) closePicker();
+        });
+        overlay.querySelector('#myteams-close').addEventListener('click', closePicker);
+        return overlay;
+      }
+
+      function flagFor(code) {
+        if (typeof codeToFlag !== 'function') return '';
+        if (code === 'GB-ENG' && typeof ENGLAND_FLAG === 'string') return ENGLAND_FLAG;
+        if (code === 'GB-SCT' && typeof SCOTLAND_FLAG === 'string') return SCOTLAND_FLAG;
+        return codeToFlag(code);
+      }
+
+      function renderTiles() {
+        const grid = document.getElementById('myteams-grid');
+        if (!grid) return;
+        let html = '';
+        ROSTER.forEach(function(team) {
+          const isFav = state.favorite === team.code;
+          const isWatch = state.watchlist.indexOf(team.code) >= 0;
+          const stateAttr = isFav ? 'fav' : isWatch ? 'watch' : 'none';
+          const srLabel = team.name + (isFav ? ', favorite' : isWatch ? ', on watchlist' : '');
+          html +=
+            '<button type="button" class="tile" role="listitem"' +
+              ' data-code="' + team.code + '" data-state="' + stateAttr + '">' +
+              '<span class="flag" aria-hidden="true">' + flagFor(team.code) + '</span>' +
+              team.name +
+              '<span class="sr-only">, ' + srLabel + '</span>' +
+            '</button>';
+        });
+        grid.innerHTML = html;
+      }
+
+      function renderCounts() {
+        const el = document.getElementById('myteams-counts');
+        if (!el) return;
+        const favCount = state.favorite ? 1 : 0;
+        const watchCount = state.watchlist.length;
+        el.textContent = '★ ' + favCount + ' favorite · • ' + watchCount + ' of ' + WATCHLIST_MAX + ' watchlist';
+      }
+
       function init() {
         load();
         renderButton();
@@ -1573,7 +1814,7 @@
         removeWatchlist: removeWatchlist,
         cycle: cycle,
         onChange: onChange,
-        // openPicker added in Task 3
+        openPicker: openPicker,
       };
     })();
 
