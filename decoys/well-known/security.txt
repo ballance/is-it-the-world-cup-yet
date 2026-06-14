@@ -1,0 +1,4 @@
+Contact: mailto:security@worldcupyet.com
+Expires: 2027-06-14T00:00:00Z
+Preferred-Languages: en
+Canonical: https://worldcupyet.com/.well-known/security.txt

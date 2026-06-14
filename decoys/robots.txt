@@ -1,0 +1,10 @@
+# worldcupyet.com - a single page that answers the question
+User-agent: *
+Allow: /
+
+# Honeypot bait. Anything that fetches these will show up in the logs.
+Disallow: /admin/golden-boot/
+Disallow: /lockerroom/
+Disallow: /tactical-board/draft/
+
+Sitemap: https://worldcupyet.com/sitemap.xml
