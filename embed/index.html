@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Embed the WCY Countdown</title>
+  <meta name="description" content="Drop a live World Cup 2026 countdown on your site with one iframe.">
+  <meta property="og:title" content="Embed the WCY Countdown">
+  <meta property="og:description" content="Drop a live World Cup 2026 countdown on your site with one iframe.">
+  <meta property="og:url" content="https://worldcupyet.com/embed/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://worldcupyet.com/og-image.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%E2%9A%BD%3C%2Ftext%3E%3C%2Fsvg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #FFD700;
+      --gold-dim: rgba(255, 215, 0, 0.82);
+      --bg: #0a1128;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(191, 10, 48, 0.32), transparent 55%),
+        radial-gradient(circle at 88% 90%, rgba(0, 104, 71, 0.30), transparent 55%),
+        var(--bg);
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 36px 18px 60px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .back {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+    .back:hover { color: var(--gold); }
+    h1 {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: clamp(38px, 8vw, 64px);
+      letter-spacing: 0.02em;
+      color: var(--gold);
+      margin: 4px 0 10px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 32px rgba(255, 215, 0, 0.25);
+    }
+    p.lead {
+      font-size: 16px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.86);
+      margin: 0 0 28px;
+    }
+    .preview {
+      margin: 0 0 32px;
+      display: flex;
+      justify-content: center;
+    }
+    iframe.demo {
+      width: 320px;
+      height: 140px;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 10px;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+      background: #0a1128;
+    }
+    h2 {
+      font-size: 14px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin: 32px 0 10px;
+    }
+    pre {
+      background: rgba(10, 17, 40, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #fff;
+      margin: 0 0 18px;
+    }
+    .copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 215, 0, 0.10);
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      color: var(--gold);
+      font: inherit;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .copy:hover, .copy:focus-visible {
+      background: rgba(255, 215, 0, 0.22);
+      border-color: rgba(255, 215, 0, 0.75);
+      outline: none;
+    }
+    .copy.copied {
+      background: rgba(0, 200, 120, 0.18);
+      border-color: rgba(0, 200, 120, 0.6);
+      color: #b8f4d6;
+    }
+    ul.tips {
+      padding-left: 18px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.82);
+    }
+    ul.tips li { margin-bottom: 8px; }
+    ul.tips code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    .footer {
+      margin-top: 48px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="/">← worldcupyet.com</a>
+    <h1>Embed the Countdown</h1>
+    <p class="lead">Drop a live World Cup 2026 countdown into your blog, sidebar, or fan page with one iframe. It auto-updates: counts down to the next kickoff, switches to the live score during matches, and goes quiet once the tournament ends. No tracking, no third-party scripts, no API keys.</p>
+
+    <div class="preview">
+      <iframe class="demo" src="/embed/countdown.html" title="World Cup 2026 countdown" loading="lazy"></iframe>
+    </div>
+
+    <h2>Copy this</h2>
+<pre id="snippet">&lt;iframe src=&quot;https://worldcupyet.com/embed/countdown.html&quot;
+        width=&quot;320&quot; height=&quot;140&quot;
+        style=&quot;border:0;border-radius:10px&quot;
+        title=&quot;World Cup 2026 countdown&quot;
+        loading=&quot;lazy&quot;&gt;&lt;/iframe&gt;</pre>
+    <button class="copy" id="copy-btn" type="button">📋 Copy snippet</button>
+
+    <h2>Sizing</h2>
+    <ul class="tips">
+      <li>The widget is responsive — pick any size from <code>240×100</code> to full-width <code>800×220</code> and the type rescales with <code>clamp()</code> and viewport units.</li>
+      <li>Default <code>320×140</code> fits most blog sidebars cleanly.</li>
+      <li>For a banner-style placement, try <code>width=&quot;100%&quot;</code> and <code>height=&quot;160&quot;</code>.</li>
+    </ul>
+
+    <h2>What it shows</h2>
+    <ul class="tips">
+      <li><strong>Before kickoff</strong> — the next scheduled match and a live countdown <code>3d 4h</code>, <code>2h 15m</code>, or <code>4m 30s</code>.</li>
+      <li><strong>During a match</strong> — a pulsing <code>● LIVE</code> tag, the team names, and the live score.</li>
+      <li><strong>After the final</strong> — a trophy and <code>See you in 2030</code>.</li>
+    </ul>
+
+    <h2>Polling and bandwidth</h2>
+    <ul class="tips">
+      <li>The widget fetches <code>matches.json</code> once on load (cached aggressively).</li>
+      <li>Live scores poll <code>live.json</code> every 30 seconds <em>only while at least one match is in its live window</em>. Outside that window the widget is silent.</li>
+      <li>Countdown ticks locally every second — no network involved.</li>
+    </ul>
+
+    <p class="footer">⚽ worldcupyet.com</p>
+  </main>
+
+  <script>
+    document.getElementById('copy-btn').addEventListener('click', function () {
+      const text = document.getElementById('snippet').textContent;
+      const btn = this;
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = '📋 Copy snippet';
+          btn.classList.remove('copied');
+        }, 1800);
+      }).catch(function () {
+        btn.textContent = '⚠ Copy failed';
+      });
+    });
+  </script>
+</body>
+</html>
