@@ -2,9 +2,11 @@
 .claude/
 .playwright-mcp/
 .DS_Store
+.env
 lambda/*/dist/
 lambda/*/bundle.zip
 infra/*/.terraform/
 infra/*/.terraform.lock.hcl
 infra/*/terraform.tfstate*
 infra/*/.tfstate.backup
+infra/*/tfplan
