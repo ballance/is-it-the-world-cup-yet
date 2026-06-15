@@ -74,6 +74,47 @@
       padding: 0 20px;
     }
 
+    #why-details {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      width: 92%;
+      margin: 18px 0 0;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    #why-details summary {
+      cursor: pointer;
+      list-style: none;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(255, 215, 0, 0.78);
+      padding: 6px 10px;
+    }
+    #why-details summary::-webkit-details-marker { display: none; }
+    #why-details summary::before {
+      content: '? ';
+      opacity: 0.6;
+    }
+    #why-details[open] summary::before { content: '× '; }
+    #why-details .why-body {
+      background: rgba(10, 17, 40, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    #why-details .why-body p { margin: 0 0 8px; }
+    #why-details .why-body p:last-child { margin-bottom: 0; }
+    #why-details .why-body a {
+      color: rgba(255, 215, 0, 0.85);
+      text-decoration: underline;
+    }
+
     #copyright {
       position: relative;
       z-index: 1;
@@ -983,6 +1024,13 @@
       border-color: rgba(255, 80, 80, 0.5);
       box-shadow: 0 0 0 1px rgba(255, 80, 80, 0.18), 0 4px 22px rgba(255, 80, 80, 0.16);
     }
+    .match.is-sticky {
+      position: sticky;
+      top: 6px;
+      z-index: 5;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
     .match-live.match-final .score {
       color: rgba(255, 255, 255, 0.7);
     }
@@ -1182,6 +1230,19 @@
   <div id="countdown"></div>
   <button id="boss-btn" aria-label="Boss mode">Boss Mode</button>
   <div id="boss-overlay"></div>
+  <details id="why-details">
+    <summary>How this works</summary>
+    <div class="why-body">
+      <p>This page says <strong>YES</strong> while a FIFA World Cup tournament window is open
+        — from the opening match through the final whistle. Outside that window it says <strong>NO</strong>
+        and counts down to the next one.</p>
+      <p>Match data comes from <a href="/matches.json" rel="nofollow">matches.json</a>
+        (the FIFA 2026 schedule). Live scores update once a minute from
+        <a href="https://www.football-data.org/" rel="noopener" target="_blank">football-data.org</a>.
+        Times shown are converted to your device's timezone; venue-local times are also displayed.</p>
+      <p>No tracking, no cookies, no third-party scripts on this page.</p>
+    </div>
+  </details>
   <div id="copyright">&copy; 2026 Chris Ballance</div>
 
   <script>
@@ -2700,6 +2761,39 @@
         return '<span class="broadcast">📺 FOX · Telemundo</span>';
       }
 
+      // Tournament venue capacities (FIFA-published seating). Keyed by the
+      // venue.city string in matches.json so we don't have to rewrite the data.
+      const VENUE_CAPACITY = {
+        'Atlanta': 71000,
+        'Boston': 65878, 'Foxborough': 65878,
+        'Dallas': 80000, 'Arlington': 80000,
+        'Houston': 72220,
+        'Kansas City': 76416,
+        'Los Angeles': 70240, 'Inglewood': 70240,
+        'Miami': 65326, 'Miami Gardens': 65326,
+        'New York': 82500, 'East Rutherford': 82500, 'New York New Jersey': 82500,
+        'Philadelphia': 67594,
+        'San Francisco': 68500, 'Santa Clara': 68500,
+        'Seattle': 68740,
+        'Toronto': 45000,
+        'Vancouver': 54500,
+        'Mexico City': 83264,
+        'Guadalajara': 49850, 'Zapopan': 49850,
+        'Monterrey': 53500,
+      };
+
+      function formatCapacity(n) {
+        return n.toLocaleString('en-US');
+      }
+
+      function capacityFor(venueCity) {
+        if (!venueCity) return null;
+        if (VENUE_CAPACITY[venueCity] != null) return VENUE_CAPACITY[venueCity];
+        // Fallback: try first comma-separated chunk
+        const head = venueCity.split(',')[0].trim();
+        return VENUE_CAPACITY[head] != null ? VENUE_CAPACITY[head] : null;
+      }
+
       function computeStandings(groupLetter) {
         if (!cache) return [];
         const stageName = 'Group ' + groupLetter;
@@ -2859,7 +2953,12 @@
             (opts.label ? '<span class="label-tag">' + escapeHtml(opts.label) + '</span>' : '') +
             '<span class="time-primary">' + escapeHtml(formatPrimaryTime(kickoff, userTz)) + '</span>' +
             '<span class="time-venue">' + escapeHtml(formatVenueTime(kickoff, match.venue.tz)) + '</span>' +
-            '<span class="venue">' + escapeHtml(match.venue.city + ' · ' + match.stage) + '</span>' +
+            '<span class="venue">' + escapeHtml(match.venue.city + ' · ' + match.stage) +
+              (function() {
+                const cap = capacityFor(match.venue.city);
+                return cap ? ' · ' + formatCapacity(cap) + ' seats' : '';
+              })() +
+            '</span>' +
             broadcastLine(match) +
             (status === 'live' ? '<span class="badge live" aria-live="polite"><span class="dot"></span>LIVE</span>' : '') +
             (status === 'final' ? '<span class="badge final">FT</span>' : '') +
@@ -2992,6 +3091,12 @@
             viewMatches.forEach(function(m) {
               list.appendChild(renderCard(m, now));
             });
+            if (isToday) {
+              // Pin the first currently-live (non-final) card so it stays
+              // visible while the user scrolls through the rest of the day.
+              const firstLive = list.querySelector('.match.match-live:not(.match-final)');
+              if (firstLive) firstLive.classList.add('is-sticky');
+            }
             const anyMine = viewMatches.some(matchInvolvesMine);
             if (isToday && hasSelections && !anyMine) appendNextLine(findMyNextMatch());
           }
