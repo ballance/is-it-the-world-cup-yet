@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #002868 0%, #bf0a30 28%, #006847 58%, #ce1126 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .ball {
+      position: absolute;
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, #f0f0f0 0%, #d0d0d0 70%, #999 100%);
+      box-shadow:
+        inset -10px -10px 24px rgba(0,0,0,0.25),
+        0 6px 18px rgba(0,0,0,0.35);
+      opacity: 0.85;
+    }
+    .ball::before, .ball::after {
+      content: '';
+      position: absolute;
+      background: #1a1a1a;
+      border-radius: 50%;
+    }
+    .ball::before { width: 18px; height: 18px; top: 12px; left: 36px; }
+    .ball::after  { width: 14px; height: 14px; bottom: 18px; right: 22px; }
+    .ball.b1 { top: 50px;  left: 60px;  transform: rotate(20deg); }
+    .ball.b2 { top: 410px; left: 100px; transform: rotate(-15deg); width: 70px; height: 70px; }
+    .ball.b3 { top: 100px; right: 90px; transform: rotate(40deg); }
+    .ball.b4 { top: 430px; right: 130px; transform: rotate(-30deg); width: 70px; height: 70px; }
+    .ball.b5 { top: 270px; right: 30px; transform: rotate(10deg); width: 50px; height: 50px; opacity: 0.6; }
+
+    .trophy {
+      font-size: 80px;
+      line-height: 1;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 4px 14px rgba(255, 215, 0, 0.45));
+    }
+    .yes {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 380px;
+      line-height: 0.85;
+      color: #FFD700;
+      letter-spacing: 0.02em;
+      text-shadow:
+        0 4px 8px rgba(0,0,0,0.45),
+        0 0 60px rgba(255, 215, 0, 0.5),
+        0 0 120px rgba(255, 215, 0, 0.3);
+    }
+    .tagline {
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-size: 32px;
+      color: #b8e6b8;
+      margin-top: 12px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .footer {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="ball b1"></div>
+  <div class="ball b2"></div>
+  <div class="ball b3"></div>
+  <div class="ball b4"></div>
+  <div class="ball b5"></div>
+
+  <div class="trophy">🏆</div>
+  <div class="yes">YES!</div>
+  <div class="tagline">Is it the World Cup?</div>
+  <div class="footer">worldcupyet.com</div>
+</body>
+</html>
