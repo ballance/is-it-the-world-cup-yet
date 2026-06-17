@@ -1,4 +1,5 @@
 .superpowers/
+docs/superpowers/
 .claude/
 .playwright-mcp/
 .DS_Store
