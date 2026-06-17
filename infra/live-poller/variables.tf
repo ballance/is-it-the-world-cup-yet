@@ -21,7 +21,7 @@ variable "ssm_parameter_name" {
 }
 
 variable "schedule_expression" {
-  description = "EventBridge schedule expression. Note: aws_cloudwatch_event_rule requires minimum rate(1 minute); for sub-minute cadence switch to aws_scheduler_schedule."
+  description = "EventBridge schedule. Minimum is rate(1 minute); for sub-minute cadence, switch to aws_scheduler_schedule."
   type        = string
   default     = "rate(1 minute)"
 }

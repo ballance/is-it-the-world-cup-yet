@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Embed the WCY Countdown</title>
+  <title>Embed the Countdown · worldcupyet.com</title>
   <meta name="description" content="Drop a live World Cup 2026 countdown on your site with one iframe.">
-  <meta property="og:title" content="Embed the WCY Countdown">
+  <meta property="og:title" content="Embed the Countdown · worldcupyet.com">
   <meta property="og:description" content="Drop a live World Cup 2026 countdown on your site with one iframe.">
   <meta property="og:url" content="https://worldcupyet.com/embed/">
   <meta property="og:type" content="website">
@@ -147,7 +147,7 @@
   <main>
     <a class="back" href="/">← worldcupyet.com</a>
     <h1>Embed the Countdown</h1>
-    <p class="lead">Drop a live World Cup 2026 countdown into your blog, sidebar, or fan page with one iframe. It auto-updates: counts down to the next kickoff, switches to the live score during matches, and goes quiet once the tournament ends. No tracking, no third-party scripts, no API keys.</p>
+    <p class="lead">Drop a live World Cup 2026 countdown into your blog, sidebar, or fan page with one iframe. It counts down to the next kickoff, switches to the live score during matches, and goes quiet when the tournament ends. No tracking, no third-party scripts, no API keys.</p>
 
     <div class="preview">
       <iframe class="demo" src="/embed/countdown.html" title="World Cup 2026 countdown" loading="lazy"></iframe>
@@ -163,7 +163,7 @@
 
     <h2>Sizing</h2>
     <ul class="tips">
-      <li>The widget is responsive — pick any size from <code>240×100</code> to full-width <code>800×220</code> and the type rescales with <code>clamp()</code> and viewport units.</li>
+      <li>Responsive from <code>240×100</code> up to a full-width <code>800×220</code>; the type rescales to fit, no per-site tuning needed.</li>
       <li>Default <code>320×140</code> fits most blog sidebars cleanly.</li>
       <li>For a banner-style placement, try <code>width=&quot;100%&quot;</code> and <code>height=&quot;160&quot;</code>.</li>
     </ul>
@@ -177,9 +177,9 @@
 
     <h2>Polling and bandwidth</h2>
     <ul class="tips">
-      <li>The widget fetches <code>matches.json</code> once on load (cached aggressively).</li>
-      <li>Live scores poll <code>live.json</code> every 30 seconds <em>only while at least one match is in its live window</em>. Outside that window the widget is silent.</li>
-      <li>Countdown ticks locally every second — no network involved.</li>
+      <li><code>matches.json</code> is fetched once on load and cached aggressively.</li>
+      <li><code>live.json</code> is polled every 30 seconds <em>only while at least one match is in its live window</em>. Outside that window, the widget is silent on the network.</li>
+      <li>The countdown ticks locally every second — no requests.</li>
     </ul>
 
     <p class="footer">⚽ worldcupyet.com</p>
