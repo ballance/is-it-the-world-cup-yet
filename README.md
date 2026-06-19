@@ -180,9 +180,10 @@ The S3 bucket and CloudFront distribution aren't owned by this module, so they s
 
 1. Edit `matches.json` to replace `"TBD"` codes with real team codes.
 2. Run `python3 scripts/generate-ics.py` to rebuild `schedule.ics`.
-3. Re-upload both to S3 and invalidate the CloudFront paths.
-4. Re-zip the Lambda with `./build.sh` — it bundles its own copy of `matches.json` for the FIFA-match-id lookup table.
-5. Push the new bundle with `aws lambda update-function-code --function-name ... --zip-file fileb://bundle.zip` (or `terraform apply`).
+3. Run `python3 scripts/generate-jsonld.py` to refresh the schema.org JSON-LD inlined in `index.html`.
+4. Re-upload `matches.json`, `schedule.ics`, and `index.html` to S3 and invalidate the CloudFront paths.
+5. Re-zip the Lambda with `./build.sh` — it bundles its own copy of `matches.json` for the FIFA-match-id lookup table.
+6. Push the new bundle with `aws lambda update-function-code --function-name ... --zip-file fileb://bundle.zip` (or `terraform apply`).
 
 ---
 
